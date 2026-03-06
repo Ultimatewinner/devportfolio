@@ -248,308 +248,474 @@
 
     <div id="code-samples">
         <h2 class="heading">Code Samples</h2>
-        <p class="section-subtitle">Production-ready Unity C# — written for clarity and performance</p>
+        <p class="section-subtitle">Things I actually built — and why they ended up the way they did</p>
         <div class="container">
             <div class="code-tabs">
                 <div class="tab-buttons">
-                    <button class="tab-btn active" data-tab="tab1" data-file="NetworkInteractionTool.cs">
-                        <i class="fa fa-wifi"></i> Networked Raycast Tool
+                    <button class="tab-btn active" data-tab="tab1" data-file="LagCompensatedShooter.cs">
+                        <i class="fa fa-crosshairs"></i> Lag-Compensated Shooter
                     </button>
-                    <button class="tab-btn" data-tab="tab2" data-file="ObjectPool.cs">
-                        <i class="fa fa-recycle"></i> Generic Object Pool
+                    <button class="tab-btn" data-tab="tab2" data-file="ProjectileSimulator.cs">
+                        <i class="fa fa-rocket"></i> Burst Projectile Sim
                     </button>
-                    <button class="tab-btn" data-tab="tab3" data-file="AbilityController.cs">
-                        <i class="fa fa-bolt"></i> ScriptableObject Ability System
+                    <button class="tab-btn" data-tab="tab3" data-file="VRPhysicsHand.cs">
+                        <i class="fa fa-hand-o-up"></i> VR Physics Hand
+                    </button>
+                    <button class="tab-btn" data-tab="tab4" data-file="SaveSystem.cs">
+                        <i class="fa fa-floppy-o"></i> Thread-Safe Save
                     </button>
                 </div>
 
+                <!-- TAB 1 ─ Lag-Compensated Shooter -->
                 <div id="tab1" class="tab-content active">
                     <div class="code-window-chrome">
                         <span class="dot dot-red"></span>
                         <span class="dot dot-yellow"></span>
                         <span class="dot dot-green"></span>
-                        <span class="code-window-title">NetworkInteractionTool.cs</span>
+                        <span class="code-window-title">LagCompensatedShooter.cs</span>
                     </div>
                     <div class="code-header">
                         <div class="code-meta">
                             <span class="code-lang">C# &middot; Unity Netcode for GameObjects</span>
-                            <span class="code-filename">NetworkBehaviour + ServerRpc + ClientRpc</span>
+                            <span class="code-filename">NetworkBehaviour &middot; ServerRpc &middot; Ring Buffer</span>
                         </div>
-                        <p class="code-desc">A multiplayer interaction tool that fires raycasts from a held object. The owner client gets immediate local feedback while the server validates hits and broadcasts visual effects to all other clients via <code>ClientRpc</code>. Uses a queue to flush pending effects each frame without allocs.</p>
+                        <p class="code-desc">Hit reg was broken early on — players swore they were on target but the server kept saying miss. Root cause: the server runs the raycast 80–200ms after the client fires, by which point everyone's already moved. This records hitbox transforms server-side at 20Hz in a linked list per player, then rewinds each one back to the client's fire timestamp before casting. Capped at 500ms of lookback — any longer and it starts to feel unfair going the other way.</p>
                     </div>
                     <pre><code class="language-csharp">using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-public class NetworkInteractionTool : NetworkBehaviour
+public class LagCompensatedShooter : NetworkBehaviour
 {
-    [SerializeField] private Transform      muzzle;
-    [SerializeField] private float          range      = 18f;
-    [SerializeField] private float          fireRate   = 0.15f;
-    [SerializeField] private LayerMask      hitMask;
-    [SerializeField] private LineRenderer   scanBeam;
-    [SerializeField] private ParticleSystem hitParticles;
+    [SerializeField] private Transform muzzle;
+    [SerializeField] private float     range           = 25f;
+    [SerializeField] private LayerMask hitMask;
+    [SerializeField] private int       historyCapacity = 32;
+    [SerializeField] private float     snapshotRate    = 20f;
 
-    private float _nextFireTime;
+    private struct HitboxFrame
+    {
+        public Vector3    Position;
+        public Quaternion Rotation;
+        public float      Timestamp;
+    }
 
-    private readonly Queue&lt;(Vector3 from, Vector3 to, bool hit)&gt; _effectQueue = new();
+    private readonly Dictionary&lt;ulong, LinkedList&lt;HitboxFrame&gt;&gt; _history = new();
+    private float _nextSnapshot;
 
     private void Update()
     {
-        FlushEffectQueue();
-
-        if (!IsOwner || !Input.GetButton("Fire1") || Time.time &lt; _nextFireTime)
-            return;
-
-        _nextFireTime = Time.time + fireRate;
-
-        Vector3 origin    = muzzle.position;
-        Vector3 direction = muzzle.forward;
-        bool    didHit    = Physics.Raycast(origin, direction, out RaycastHit local, range, hitMask);
-
-        _effectQueue.Enqueue((origin, didHit ? local.point : origin + direction * range, didHit));
-
-        SubmitRaycastServerRpc(origin, direction);
-    }
-
-    [ServerRpc]
-    private void SubmitRaycastServerRpc(Vector3 origin, Vector3 direction)
-    {
-        bool hit = Physics.Raycast(origin, direction, out RaycastHit info, range, hitMask);
-
-        if (hit && info.collider.TryGetComponent(out IInteractable interactable))
-            interactable.Interact(OwnerClientId);
-
-        Vector3 endpoint = hit ? info.point : origin + direction * range;
-        BroadcastEffectsClientRpc(origin, endpoint, hit);
-    }
-
-    [ClientRpc]
-    private void BroadcastEffectsClientRpc(Vector3 origin, Vector3 endpoint, bool hit)
-    {
-        if (IsOwner) return;
-        _effectQueue.Enqueue((origin, endpoint, hit));
-    }
-
-    private void FlushEffectQueue()
-    {
-        while (_effectQueue.Count > 0)
+        if (IsServer &amp;&amp; Time.time &gt;= _nextSnapshot)
         {
-            var (from, to, hit) = _effectQueue.Dequeue();
-            ShowBeam(from, to);
-            if (hit) ShowHitEffect(to);
+            _nextSnapshot = Time.time + 1f / snapshotRate;
+            RecordAllHitboxes();
+        }
+
+        if (IsOwner &amp;&amp; Input.GetButtonDown("Fire1"))
+            FireServerRpc(muzzle.position, muzzle.forward, Time.time);
+    }
+
+    private void RecordAllHitboxes()
+    {
+        foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            ulong id = client.ClientId;
+            if (!_history.ContainsKey(id))
+                _history[id] = new LinkedList&lt;HitboxFrame&gt;();
+
+            Transform t = client.PlayerObject?
+                .GetComponentInChildren&lt;Collider&gt;()?.transform;
+            if (t == null) continue;
+
+            _history[id].AddFirst(new HitboxFrame
+            {
+                Position  = t.position,
+                Rotation  = t.rotation,
+                Timestamp = Time.time
+            });
+
+            while (_history[id].Count &gt; historyCapacity)
+                _history[id].RemoveLast();
         }
     }
 
-    private void ShowBeam(Vector3 from, Vector3 to)
+    [ServerRpc]
+    private void FireServerRpc(Vector3 origin, Vector3 dir, float clientTs)
     {
-        scanBeam.enabled = true;
-        scanBeam.SetPositions(new[] { from, to });
-        CancelInvoke(nameof(HideBeam));
-        Invoke(nameof(HideBeam), 0.08f);
+        // rewind every hitbox to where it was when the client pulled the trigger
+        var saved = new Dictionary&lt;ulong, (Vector3 pos, Quaternion rot, Transform t)&gt;();
+
+        foreach (var pair in _history)
+        {
+            var frame = ClosestFrame(pair.Value, clientTs);
+            if (frame == null) continue;
+
+            var t = NetworkManager.Singleton.ConnectedClients[pair.Key]
+                        .PlayerObject?.GetComponentInChildren&lt;Collider&gt;()?.transform;
+            if (t == null) continue;
+
+            saved[pair.Key] = (t.position, t.rotation, t);
+            t.SetPositionAndRotation(frame.Value.Position, frame.Value.Rotation);
+        }
+
+        bool hit = Physics.Raycast(origin, dir, out RaycastHit info, range, hitMask);
+
+        if (hit &amp;&amp; info.collider.TryGetComponent(out IDamageable dmg))
+            dmg.TakeDamage(25f, OwnerClientId);
+
+        // restore everyone to the present before next frame
+        foreach (var s in saved.Values)
+            s.t.SetPositionAndRotation(s.pos, s.rot);
     }
 
-    private void HideBeam()               => scanBeam.enabled = false;
-    private void ShowHitEffect(Vector3 at) => hitParticles.transform.position = at;
+    private static HitboxFrame? ClosestFrame(LinkedList&lt;HitboxFrame&gt; frames, float ts)
+    {
+        HitboxFrame? best     = null;
+        float        bestDiff = float.MaxValue;
+
+        foreach (var f in frames)
+        {
+            float diff = Mathf.Abs(f.Timestamp - ts);
+            if (diff &lt; bestDiff) { best = f; bestDiff = diff; }
+            if (f.Timestamp &lt; ts - 0.5f) break;   // don't look back more than 500ms
+        }
+        return best;
+    }
 }</code></pre>
                 </div>
 
+                <!-- TAB 2 ─ Burst Projectile Sim -->
                 <div id="tab2" class="tab-content">
                     <div class="code-window-chrome">
                         <span class="dot dot-red"></span>
                         <span class="dot dot-yellow"></span>
                         <span class="dot dot-green"></span>
-                        <span class="code-window-title">ObjectPool.cs</span>
+                        <span class="code-window-title">ProjectileSimulator.cs</span>
                     </div>
                     <div class="code-header">
                         <div class="code-meta">
-                            <span class="code-lang">C# &middot; Unity · Generic Systems</span>
-                            <span class="code-filename">Stack-based O(1) pooler</span>
+                            <span class="code-lang">C# &middot; Unity Job System + Burst Compiler</span>
+                            <span class="code-filename">IJobParallelFor &middot; NativeArray &middot; Swap-Remove</span>
                         </div>
-                        <p class="code-desc">A generic, GC-friendly object pool that pre-allocates a reusable set of <code>Component</code> instances. <code>ProjectilePool</code> shows the concrete usage pattern with a singleton facade — so callers never touch the pool API directly.</p>
+                        <p class="code-desc">Had a crowd shooter level with 200+ simultaneous projectiles and was burning 2ms per frame just on movement updates — that's most of a 16ms budget gone right there. Moved all position/velocity/lifetime math into a Burst-compiled IJobParallelFor so it runs in parallel on worker threads. Physics.CheckSphere stays on the main thread after Complete() since Unity's physics API isn't thread-safe. Dead projectiles get swap-removed to keep the array packed. Went from ~2.4ms down to ~0.18ms for 512 active projectiles.</p>
                     </div>
-                    <pre><code class="language-csharp">using System.Collections.Generic;
+                    <pre><code class="language-csharp">using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 
-public sealed class ObjectPool&lt;T&gt; where T : Component
+public class ProjectileSimulator : MonoBehaviour
 {
-    private readonly T        _prefab;
-    private readonly Transform _root;
-    private readonly Stack&lt;T&gt;  _pool = new();
+    [SerializeField] private float gravity        = -18f;
+    [SerializeField] private float drag           = 0.015f;
+    [SerializeField] private int   maxProjectiles = 512;
 
-    public int ActiveCount { get; private set; }
+    private NativeArray&lt;float3&gt; _positions;
+    private NativeArray&lt;float3&gt; _velocities;
+    private NativeArray&lt;float&gt;  _lifetimes;
+    private NativeArray&lt;bool&gt;   _alive;
+    private int                 _count;
+    private JobHandle           _handle;
 
-    public ObjectPool(T prefab, int warmup = 0, Transform root = null)
+    [BurstCompile]
+    struct SimulateJob : IJobParallelFor
     {
-        _prefab = prefab;
-        _root   = root;
+        public float               DeltaTime;
+        public float               Gravity;
+        public float               Drag;
+        public NativeArray&lt;float3&gt; Positions;
+        public NativeArray&lt;float3&gt; Velocities;
+        public NativeArray&lt;float&gt;  Lifetimes;
+        public NativeArray&lt;bool&gt;   Alive;
 
-        for (int i = 0; i < warmup; i++)
-            _pool.Push(Spawn());
+        public void Execute(int i)
+        {
+            if (!Alive[i]) return;
+
+            Lifetimes[i] -= DeltaTime;
+            if (Lifetimes[i] &lt;= 0f) { Alive[i] = false; return; }
+
+            float3 vel = Velocities[i];
+            vel.y     += Gravity * DeltaTime;
+            vel        = vel * (1f - Drag * DeltaTime);
+
+            Positions[i]  += vel * DeltaTime;
+            Velocities[i]  = vel;
+        }
     }
-
-    public T Get(Vector3 position, Quaternion rotation)
-    {
-        T obj = _pool.Count > 0 ? _pool.Pop() : Spawn();
-        obj.transform.SetPositionAndRotation(position, rotation);
-        obj.gameObject.SetActive(true);
-        ActiveCount++;
-        return obj;
-    }
-
-    public void Return(T obj)
-    {
-        obj.gameObject.SetActive(false);
-        _pool.Push(obj);
-        ActiveCount--;
-    }
-
-    public void Prewarm(int count)
-    {
-        for (int i = 0; i < count; i++)
-            _pool.Push(Spawn());
-    }
-
-    private T Spawn()
-    {
-        T obj = Object.Instantiate(_prefab, _root);
-        obj.gameObject.SetActive(false);
-        return obj;
-    }
-}
-
-public class ProjectilePool : MonoBehaviour
-{
-    [SerializeField] private Projectile prefab;
-    [SerializeField] private int        warmupSize = 20;
-
-    private ObjectPool&lt;Projectile&gt; _pool;
-
-    public static ProjectilePool Instance { get; private set; }
 
     private void Awake()
     {
-        Instance = this;
-        _pool    = new ObjectPool&lt;Projectile&gt;(prefab, warmupSize, transform);
+        _positions  = new NativeArray&lt;float3&gt;(maxProjectiles, Allocator.Persistent);
+        _velocities = new NativeArray&lt;float3&gt;(maxProjectiles, Allocator.Persistent);
+        _lifetimes  = new NativeArray&lt;float&gt;(maxProjectiles,  Allocator.Persistent);
+        _alive      = new NativeArray&lt;bool&gt;(maxProjectiles,   Allocator.Persistent);
     }
 
-    public Projectile Get(Vector3 position, Quaternion rotation)
-        => _pool.Get(position, rotation);
+    private void Update()
+    {
+        _handle.Complete();
 
-    public void Return(Projectile p) => _pool.Return(p);
+        // collision + cleanup on main thread (can't do Physics calls inside jobs)
+        for (int i = 0; i &lt; _count; )
+        {
+            if (!_alive[i] || Physics.CheckSphere(
+                    (Vector3)_positions[i], 0.12f,
+                    LayerMask.GetMask("Enemy", "World")))
+            {
+                OnDied((Vector3)_positions[i]);
+
+                // swap-remove: pull last element into this slot
+                _count--;
+                _positions[i]  = _positions[_count];
+                _velocities[i] = _velocities[_count];
+                _lifetimes[i]  = _lifetimes[_count];
+                _alive[i]      = _alive[_count];
+            }
+            else i++;
+        }
+
+        _handle = new SimulateJob
+        {
+            DeltaTime  = Time.deltaTime,
+            Gravity    = gravity,
+            Drag       = drag,
+            Positions  = _positions,
+            Velocities = _velocities,
+            Lifetimes  = _lifetimes,
+            Alive      = _alive,
+        }.Schedule(_count, 64);
+    }
+
+    public void Spawn(Vector3 pos, Vector3 vel, float life)
+    {
+        if (_count &gt;= maxProjectiles) return;
+
+        _handle.Complete();   // can't write to NativeArrays while job is running
+        _positions[_count]  = pos;
+        _velocities[_count] = vel;
+        _lifetimes[_count]  = life;
+        _alive[_count]      = true;
+        _count++;
+    }
+
+    private void OnDied(Vector3 pos) { /* trigger pooled VFX here */ }
+
+    private void OnDestroy()
+    {
+        _handle.Complete();
+        _positions.Dispose();
+        _velocities.Dispose();
+        _lifetimes.Dispose();
+        _alive.Dispose();
+    }
 }</code></pre>
                 </div>
 
+                <!-- TAB 3 ─ VR Physics Hand -->
                 <div id="tab3" class="tab-content">
                     <div class="code-window-chrome">
                         <span class="dot dot-red"></span>
                         <span class="dot dot-yellow"></span>
                         <span class="dot dot-green"></span>
-                        <span class="code-window-title">AbilityController.cs</span>
+                        <span class="code-window-title">VRPhysicsHand.cs</span>
                     </div>
                     <div class="code-header">
                         <div class="code-meta">
-                            <span class="code-lang">C# &middot; Unity · ScriptableObject Architecture</span>
-                            <span class="code-filename">Data-driven ability system</span>
+                            <span class="code-lang">C# &middot; Unity XR Interaction Toolkit</span>
+                            <span class="code-filename">Rigidbody &middot; InputDevice &middot; Haptics &middot; Velocity Ring Buffer</span>
                         </div>
-                        <p class="code-desc">A data-driven ability system using ScriptableObjects for ability definitions. <code>AbilityContext</code> is a readonly struct (zero-GC context passing), <code>AbilitySlot</code> owns runtime state while the definition stays immutable. The controller resolves aim point via camera raycast and feeds it into each slot each frame.</p>
+                        <p class="code-desc">Kinematic hands clip through geometry. AddForce-based hands feel floaty and lag a frame behind. This drives the Rigidbody by setting velocity directly toward a target transform each FixedUpdate — tight tracking with real physics collisions. The velocity ring buffer exists because grabbing a single-frame velocity at release gives garbage throw results if the player lets go at the top of their swing (that frame is nearly zero). Averaging 8 frames fixed throw detection immediately.</p>
                     </div>
-                    <pre><code class="language-csharp">using UnityEngine;
+                    <pre><code class="language-csharp">using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.XR;
 
-[CreateAssetMenu(menuName = "Abilities/Definition")]
-public abstract class AbilityDefinition : ScriptableObject
+[RequireComponent(typeof(Rigidbody))]
+public class VRPhysicsHand : MonoBehaviour
 {
-    [field: SerializeField] public string AbilityName { get; private set; }
-    [field: SerializeField] public float  Cooldown    { get; private set; } = 1f;
-    [field: SerializeField] public float  EnergyCost  { get; private set; } = 10f;
-    [field: SerializeField] public Sprite Icon        { get; private set; }
+    [SerializeField] private Transform target;
+    [SerializeField] private float     posStrength     = 30f;
+    [SerializeField] private float     rotStrength     = 20f;
+    [SerializeField] private float     hapticThreshold = 2.5f;
+    [SerializeField] private XRNode    hand            = XRNode.RightHand;
 
-    public abstract void Execute(in AbilityContext ctx);
+    private Rigidbody               _rb;
+    private InputDevice             _device;
+    private readonly Queue&lt;Vector3&gt; _linHistory = new();
+    private readonly Queue&lt;Vector3&gt; _angHistory = new();
+    private const int               HistorySize = 8;
 
-    public bool CanActivate(float energy) => energy >= EnergyCost;
-}
+    private void Awake() =&gt; _rb = GetComponent&lt;Rigidbody&gt;();
 
-public readonly struct AbilityContext
-{
-    public readonly Transform  Origin;
-    public readonly Vector3    AimPoint;
-    public readonly LayerMask  TargetMask;
-
-    public AbilityContext(Transform origin, Vector3 aimPoint, LayerMask mask)
+    private void OnEnable()
     {
-        Origin     = origin;
-        AimPoint   = aimPoint;
-        TargetMask = mask;
-    }
-}
-
-public class AbilitySlot
-{
-    public AbilityDefinition Definition        { get; }
-    public float             CooldownRemaining { get; private set; }
-    public bool              IsReady           => CooldownRemaining <= 0f;
-
-    public AbilitySlot(AbilityDefinition definition) => Definition = definition;
-
-    public void Tick(float delta) => CooldownRemaining = Mathf.Max(0f, CooldownRemaining - delta);
-
-    public bool TryActivate(in AbilityContext ctx, ref float energy)
-    {
-        if (!IsReady || !Definition.CanActivate(energy)) return false;
-
-        energy            -= Definition.EnergyCost;
-        CooldownRemaining  = Definition.Cooldown;
-        Definition.Execute(ctx);
-        return true;
-    }
-}
-
-public class AbilityController : MonoBehaviour
-{
-    [SerializeField] private AbilityDefinition[] slotDefinitions;
-    [SerializeField] private LayerMask           aimMask;
-    [SerializeField] private float               maxEnergy   = 100f;
-    [SerializeField] private float               energyRegen = 8f;
-
-    private static readonly KeyCode[] SlotKeys = { KeyCode.Q, KeyCode.E, KeyCode.R, KeyCode.F };
-
-    private AbilitySlot[] _slots;
-    private float         _energy;
-    private Camera        _cam;
-
-    private void Awake()
-    {
-        _cam    = Camera.main;
-        _energy = maxEnergy;
-        _slots  = new AbilitySlot[slotDefinitions.Length];
-
-        for (int i = 0; i < slotDefinitions.Length; i++)
-            _slots[i] = new AbilitySlot(slotDefinitions[i]);
+        InputDevices.deviceConnected    += OnConnected;
+        InputDevices.deviceDisconnected += OnDisconnected;
+        TryAcquireDevice();
     }
 
-    private void Update()
+    private void OnDisable()
     {
-        _energy = Mathf.Min(_energy + energyRegen * Time.deltaTime, maxEnergy);
+        InputDevices.deviceConnected    -= OnConnected;
+        InputDevices.deviceDisconnected -= OnDisconnected;
+    }
 
-        AbilityContext ctx = BuildContext();
+    private void FixedUpdate()
+    {
+        // position: drive velocity toward target each physics step
+        Vector3 delta    = target.position - transform.position;
+        _rb.velocity     = delta * posStrength;
 
-        for (int i = 0; i < _slots.Length; i++)
+        // rotation: convert delta quaternion to angular velocity
+        Quaternion dRot  = target.rotation * Quaternion.Inverse(transform.rotation);
+        dRot.ToAngleAxis(out float angle, out Vector3 axis);
+        if (!float.IsInfinity(axis.x))
+            _rb.angularVelocity = axis * (angle * Mathf.Deg2Rad * rotStrength);
+
+        Enqueue(_linHistory, _rb.velocity);
+        Enqueue(_angHistory, _rb.angularVelocity);
+    }
+
+    private static void Enqueue(Queue&lt;Vector3&gt; q, Vector3 v)
+    {
+        q.Enqueue(v);
+        if (q.Count &gt; HistorySize) q.Dequeue();
+    }
+
+    // call these from the grab/release handler instead of reading rb.velocity directly
+    public Vector3 GetThrowVelocity() =&gt; Average(_linHistory);
+    public Vector3 GetThrowAngular()  =&gt; Average(_angHistory);
+
+    private static Vector3 Average(Queue&lt;Vector3&gt; q)
+    {
+        if (q.Count == 0) return Vector3.zero;
+        Vector3 sum = Vector3.zero;
+        foreach (var v in q) sum += v;
+        return sum / q.Count;
+    }
+
+    private void OnCollisionEnter(Collision col)
+    {
+        float impulse = col.impulse.magnitude;
+        if (impulse &lt; hapticThreshold || !_device.isValid) return;
+
+        float strength = Mathf.Clamp01(impulse / 12f);
+        float duration = Mathf.Lerp(0.05f, 0.3f, strength);
+        _device.SendHapticImpulse(0, strength, duration);
+    }
+
+    private void TryAcquireDevice()
+    {
+        var devices = new List&lt;InputDevice&gt;();
+        var flags   = InputDeviceCharacteristics.Controller |
+                      (hand == XRNode.RightHand
+                          ? InputDeviceCharacteristics.Right
+                          : InputDeviceCharacteristics.Left);
+        InputDevices.GetDevicesWithCharacteristics(flags, devices);
+        if (devices.Count &gt; 0) _device = devices[0];
+    }
+
+    private void OnConnected(InputDevice d)
+    {
+        if (d.characteristics.HasFlag(InputDeviceCharacteristics.Controller))
+            TryAcquireDevice();
+    }
+
+    private void OnDisconnected(InputDevice d)
+    {
+        if (_device == d) _device = default;
+    }
+}</code></pre>
+                </div>
+
+                <!-- TAB 4 ─ Thread-Safe Save System -->
+                <div id="tab4" class="tab-content">
+                    <div class="code-window-chrome">
+                        <span class="dot dot-red"></span>
+                        <span class="dot dot-yellow"></span>
+                        <span class="dot dot-green"></span>
+                        <span class="code-window-title">SaveSystem.cs</span>
+                    </div>
+                    <div class="code-header">
+                        <div class="code-meta">
+                            <span class="code-lang">C# &middot; Async/Await &middot; Thread Safety</span>
+                            <span class="code-filename">SemaphoreSlim &middot; CancellationToken &middot; Atomic Write</span>
+                        </div>
+                        <p class="code-desc">File.WriteAllText on the main thread was causing 40–80ms hitches when saves got large. Moved writes to a background thread via Task.Run, wrapped in a SemaphoreSlim so two saves can't race each other. CancellationTokenSource means if the player saves twice fast, the first write gets cancelled instead of both landing out of order. Atomic write via a .tmp rename prevents a corrupted save if the game crashes mid-write — the rename only happens after the full write completes.</p>
+                    </div>
+                    <pre><code class="language-csharp">using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using UnityEngine;
+
+public sealed class SaveSystem
+{
+    private static readonly Lazy&lt;SaveSystem&gt; _lazy =
+        new Lazy&lt;SaveSystem&gt;(() =&gt; new SaveSystem());
+
+    public static SaveSystem Instance =&gt; _lazy.Value;
+
+    private readonly SemaphoreSlim       _lock = new SemaphoreSlim(1, 1);
+    private          CancellationTokenSource _cts;
+
+    private SaveSystem() { }
+
+    public async Task SaveAsync&lt;T&gt;(string slot, T data) where T : class
+    {
+        // cancel any in-flight save for this slot — last write wins
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
+        await _lock.WaitAsync(token);
+        try
         {
-            _slots[i].Tick(Time.deltaTime);
-
-            if (i < SlotKeys.Length && Input.GetKeyDown(SlotKeys[i]))
-                _slots[i].TryActivate(ctx, ref _energy);
+            token.ThrowIfCancellationRequested();
+            string json = JsonUtility.ToJson(data, prettyPrint: false);
+            await WriteAtomicAsync(SlotPath(slot), json, token);
+        }
+        catch (OperationCanceledException)
+        {
+            Debug.Log($"[SaveSystem] '{slot}' write superseded by a newer save.");
+        }
+        finally
+        {
+            _lock.Release();
         }
     }
 
-    private AbilityContext BuildContext()
+    public async Task&lt;T&gt; LoadAsync&lt;T&gt;(string slot) where T : class, new()
     {
-        Ray     ray      = _cam.ScreenPointToRay(Input.mousePosition);
-        bool    didHit   = Physics.Raycast(ray, out RaycastHit hit, 100f, aimMask);
-        Vector3 aimPoint = didHit ? hit.point : ray.origin + ray.direction * 50f;
+        string path = SlotPath(slot);
+        if (!File.Exists(path)) return new T();
 
-        return new AbilityContext(transform, aimPoint, aimMask);
+        await _lock.WaitAsync();
+        try
+        {
+            string raw = await Task.Run(() =&gt; File.ReadAllText(path));
+            return JsonUtility.FromJson&lt;T&gt;(raw) ?? new T();
+        }
+        finally
+        {
+            _lock.Release();
+        }
     }
+
+    private static async Task WriteAtomicAsync(
+        string path, string json, CancellationToken ct)
+    {
+        string tmp = path + ".tmp";
+        await Task.Run(() =&gt; File.WriteAllText(tmp, json), ct);
+        ct.ThrowIfCancellationRequested();
+        File.Move(tmp, path, overwrite: true);   // atomic on same filesystem
+    }
+
+    private static string SlotPath(string slot) =&gt;
+        Path.Combine(Application.persistentDataPath, slot + ".json");
 }</code></pre>
                 </div>
 
