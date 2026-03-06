@@ -5,12 +5,13 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Victor Rosas Portfolio</title>
-	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-	<link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,900" rel="stylesheet">
+    <title>Victor Rosas | Gameplay Programmer</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="libs/font-awesome/css/font-awesome.min.css">
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <link href="css/styles.css" rel="stylesheet">
 </head>
 
@@ -18,52 +19,41 @@
     <div id="mobile-menu-open" class="shadow-large">
         <i class="fa fa-bars" aria-hidden="true"></i>
     </div>
-    <!-- End #mobile-menu-toggle -->
+
     <header>
         <div id="mobile-menu-close">
             <span>Close</span> <i class="fa fa-times" aria-hidden="true"></i>
         </div>
         <ul id="menu" class="shadow">
-            <li>
-                <a href="#about">About</a>
-            </li>
-            <li>
-                <a href="#experience">Experience</a>
-            </li>
-            <li>
-                <a href="#education">Education</a>
-            </li>
-            <li>
-                <a href="#projects">Projects</a>
-            </li>
-            <li>
-                <a href="#skills">Skills</a>
-            </li>
-            <li>
-                <a href="#contact">Contact</a>
-            </li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#experience">Experience</a></li>
+            <li><a href="#education">Education</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#code-samples">Code</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#contact">Contact</a></li>
         </ul>
     </header>
-    <!-- End header -->
 
     <div id="lead">
+        <canvas id="particles"></canvas>
         <div id="lead-content">
             <h1>Victor Rosas</h1>
-            <h2>Game Designer/Programmer</h2>
-            <a href="Resume/CurriculumVictor.pdf" download="CurriculumVictor.pdf" class="btn-rounded-white">Download CV</a>
+            <h2 id="typed-subtitle">Gameplay Programmer</h2>
+            <p class="lead-tagline">
+                <span>4+ Years Experience</span>
+                <span class="divider">|</span>
+                <span>Unity &amp; C#</span>
+                <span class="divider">|</span>
+                <span>Multiplayer Systems</span>
+            </p>
+            <a href="Resume/CurriculumVictor.pdf" download="Victor_Rosas_CV.pdf" class="btn-rounded-white">Download CV</a>
         </div>
-        <!-- End #lead-content -->
-
         <div id="lead-overlay"></div>
-
         <div id="lead-down">
-            <span>
-                <i class="fa fa-chevron-down" aria-hidden="true"></i>
-            </span>
+            <span><i class="fa fa-chevron-down" aria-hidden="true"></i></span>
         </div>
-        <!-- End #lead-down -->
     </div>
-    <!-- End #lead -->
 
     <div id="about">
         <div class="container">
@@ -73,166 +63,555 @@
                 </div>
                 <div class="col-md-8">
                     <p>
-                        Hello, I'm Victor Rosas, a game developer with a strong background in C# and Unity, as well as C++ and Unreal Engine. 
-
-                        I'm a game developer committed to creating captivating and innovative gameplay experiences. With a strong attention to detail and dedication to quality, I consistently deliver results that exceed expectations. 
- 			I enjoy tackling complex challenges and continuously seek opportunities to learn and improve. 
-			When I'm not developing games, I stay up-to-date with industry trends, explore new technologies, and find inspiration in the world around me.
+                        I'm Victor Rosas, a Gameplay Programmer with 4+ years of professional experience specializing in Unity and C#. My focus is multiplayer systems, gameplay mechanics, and complex interactive simulations — from award-winning VR industrial applications to co-op action games.
+                    </p>
+                    <p>
+                        I have a proven track record of shipping award-winning titles, developing 300+ production scripts across large-scale codebases, and architecting real-time networked systems using client-server architecture. I'm passionate about clean, performant code and continuously push the limits of what gameplay can feel like.
+                    </p>
+                    <p>
+                        When I'm not coding, I explore new game mechanics, stay sharp on industry trends, and find inspiration in the worlds around me.
                     </p>
                 </div>
             </div>
         </div>
     </div>
-    <!-- End #about -->
+
+    <div id="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item reveal">
+                    <span class="stat-number" data-count="4" data-suffix="+">4+</span>
+                    <span class="stat-label">Years Experience</span>
+                </div>
+                <div class="stat-item reveal">
+                    <span class="stat-number" data-count="300" data-suffix="+">300+</span>
+                    <span class="stat-label">Scripts Written</span>
+                </div>
+                <div class="stat-item reveal">
+                    <span class="stat-number" data-count="10" data-suffix="+">10+</span>
+                    <span class="stat-label">Projects Shipped</span>
+                </div>
+                <div class="stat-item reveal">
+                    <span class="stat-number" data-count="1" data-suffix="">1</span>
+                    <span class="stat-label">Industry Award</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div id="experience" class="background-alt">
         <h2 class="heading">Experience</h2>
         <div id="experience-timeline">
-		<div data-date="April 2023 – Present">
-                <h3>Minverso</h3>
-                <h4>Unity Developer</h4>
+
+            <div data-date="October 2024 – Present">
+                <h3>Dataverso</h3>
+                <h4>Programmer</h4>
                 <p>
                 <ul>
-		   <li>Developed approximately 50 scripts for the projects, which have helped old functions and upcoming functions.</li>
-                   <li>Improved the interactions between interactables and players who use the application to generate a more immersive environment for VR.</li>
-                   <li>Successfully worked as part of a team under challenging deadlines, managing to win the best development award for one of the launched applications. Specifically, this was for 'FLSMIDTH' at expomin 2023.</li>
-                   <li>In charge of project programming, being in charge of 1 project in its entirety and 3 secondary ones.</li>
+                    <li>Architected and implemented a real-time multiplayer system using client-server network architecture, enabling seamless low-latency multi-user collaboration — directly comparable to online multiplayer game networking.</li>
+                    <li>Designed and built a robust save/load system ensuring reliable, structured persistence of complex application state across sessions — directly applicable to open-world game state management and level streaming.</li>
+                    <li>Developed complex gameplay-adjacent tools including a pattern recognition engine and algorithmic simulation systems, demonstrating large-scale, performance-conscious C# development.</li>
+                    <li>Implemented cross-platform data export/import supporting CSV, OBJ, and FBX formats, ensuring compatibility and smooth data transfer across diverse platform targets.</li>
                 </ul>
                 </p>
             </div>
-            <div data-date="January 2023 – March 2023">
-                <h3>Freelance</h3>
-                <h4>Game Designer/Programmer</h4>
+
+            <div data-date="April 2023 – October 2024">
+                <h3>Minverso</h3>
+                <h4>Gameplay Programmer / Lead</h4>
                 <p>
-	  	    
+                <ul>
+                    <li>Shipped 'FLSMIDTH', an award-winning real-time interactive 3D application recognized with Best Development Award at Expomin and Perumin 2023 — delivering physics-driven player interactions, animations, and a responsive game-like environment to live audiences.</li>
+                    <li>Developed 300+ modular Unity C# scripts to implement, upgrade, and maintain gameplay features across 4 major projects, with a strong focus on system efficiency and reusability across a large codebase.</li>
+                    <li>Designed advanced player interaction and simulation systems using Unity physics, animation controllers, and VR principles — ensuring immersive, responsive and performant experiences.</li>
+                    <li>Led full development lifecycle across 6 total projects in collaboration with designers and content creators, consistently delivering on tight deadlines.</li>
+                    <li>Applied cross-platform development best practices throughout the Unity pipeline, ensuring consistent performance across target platforms.</li>
+                </ul>
                 </p>
             </div>
 
             <div data-date="August 2022 – December 2022">
                 <h3>Sudaka Games</h3>
-                <h4>Intern</h4>
+                <h4>Gameplay Programmer Intern</h4>
                 <p>
                 <ul>
-		   <li>Designed and fixed 9 game levels to enhance player experience,using skills in level design and critical thinking to identify andsolve complex challenges.</li>
-                   <li>Developed approximately 20 new scripts in C# to improve gameplay, including AI and randomizing features, resulting in a 50% reduction in bugs and a more engaging and immersive player experience.</li>
-                   <li>Improved UI placement and design by at least 40%, resulting in a more seamless and user-friendly experience for players.</li>
-                   <li>Contributed to at least 50% of the new game content and features, collaborating with team members to drive innovation and improve overall game quality.</li>
+                    <li>Designed and fixed 9 game levels to enhance player experience, applying level design and critical thinking.</li>
+                    <li>Developed 20+ C# scripts including AI and randomization features, reducing bugs by 50%.</li>
+                    <li>Improved UI placement and design by 40%, creating a more seamless player experience.</li>
+                    <li>Contributed to 50%+ of new game content and features in close collaboration with the team.</li>
                 </ul>
                 </p>
             </div>
+
         </div>
     </div>
-    <!-- End #experience -->
 
     <div id="education">
         <h2 class="heading">Education</h2>
-        <div class="education-block">
-            <h3>University Andrés Bello</h3>
-            <span class="education-date">March 2019 - Dec 2022</span>
+        <div class="education-block reveal">
+            <h3>Universidad Andrés Bello</h3>
+            <span class="education-date">March 2019 – December 2022</span>
             <h4>Bachelor of Science in Game Design</h4>
             <p>
-                With access to state-of-the-art equipment and expert faculty with industry experience, I gained hands-on experience working on individual and team-based game projects, which allowed me to build a strong portfolio of work. Thanks to my professors and peers, I developed a strong foundation in game design and I'm now excited to apply my programming and level design skills to a career in game development.
+                Gained hands-on experience across individual and team game projects using state-of-the-art equipment and industry-experienced faculty. Built a strong portfolio spanning game programming, level design, and systems architecture. Developed a deep foundation in game development pipelines and collaborative production workflows.
             </p>
         </div>
-        <!-- End .education-block -->
     </div>
-    <!-- End #education -->
 
     <div id="projects" class="background-alt">
         <h2 class="heading">Projects</h2>
         <div class="container">
             <div class="row">
-                <div class="project shadow-large">
+
+                <div class="project shadow-large reveal">
                     <div class="project-image">
-                        <img src="images/Porton.png" />
+                        <img src="images/Porton.png" alt="Portonazo" />
                     </div>
-                    <!-- End .project-image -->
                     <div class="project-info">
                         <h3>Portonazo</h3>
+                        <div class="project-tags">
+                            <span class="tag">Unity</span>
+                            <span class="tag">C#</span>
+                            <span class="tag">Co-op</span>
+                            <span class="tag">Beat-em-up</span>
+                        </div>
                         <p>
-                            You are the new member of a local gang in where you will have to rise in ranks while you face different gangs in their respective neighborhoods, until we manage to find those who murdered your older brother. It's a 3rd person beat em up video game for 2 players, with simple melee combat, where weapons, items and teamwork will be crucial in battles in an exciting, linear and staged revenge story.
+                            A 3rd-person beat-em-up for 2 players set in a gang-warfare revenge story. Rise through the ranks, battle enemy gangs across their territories, and uncover who murdered your older brother. Weapons, items, and teamwork are key.
                         </p>
-                        <a href="https://ultimatewinner.itch.io/portonazo">View Project</a>
+                        <a href="https://ultimatewinner.itch.io/portonazo" target="_blank">View Project</a>
                     </div>
-                    <!-- End .project-info -->
                 </div>
-                <!-- End .project -->
 
-                <div class="project shadow-large">
+                <div class="project shadow-large reveal">
                     <div class="project-image">
-                        <img src="images/Desafio.png" />
+                        <img src="images/Desafio.png" alt="El Desafio del Mago" />
                     </div>
-                    <!-- End .project-image -->
                     <div class="project-info">
-                        <h3>El Desafio del Mago</h3>
+                        <h3>El Desafío del Mago</h3>
+                        <div class="project-tags">
+                            <span class="tag">Unity</span>
+                            <span class="tag">C#</span>
+                            <span class="tag">Puzzle</span>
+                            <span class="tag">Platformer</span>
+                        </div>
                         <p>
-                            You have to complete the magician's challenge, going through different levels that will increase in difficulty as you progress. You will see a world full of absurd and funny elements and at the same time you will complete the story.
+                            Navigate the magician's absurd and escalating challenge across increasingly difficult levels. A quirky world full of comedic elements wrapped around a clever puzzle-platformer experience.
                         </p>
-                        <a href="https://ultimatewinner.itch.io/eldesafodelmago">View Project</a>
+                        <a href="https://ultimatewinner.itch.io/eldesafodelmago" target="_blank">View Project</a>
                     </div>
-                    <!-- End .project-info -->
                 </div>
-		    <div class="project shadow-large">
-    			<div class="project-image">
-        		<img src="images/Donny.png" />
-    		    </div>
-    		    <!-- End .project-image -->
 
-   		   <div class="project-info">
-         	   <h3>Donny & Dinna</h3>
-        	   <p>
-            		Donny & Dinna is a cooperative multiplayer game for two players in which they will have to solve puzzles together to recover precious oxygen.
-        	   </p>
-		   <a href="https://ultimatewinner.itch.io/donnydinna">View Project</a>
-    	       </div>
-    		<!-- End .project-info -->
-		</div>
-		    <!-- Projects Above -->
+                <div class="project shadow-large reveal">
+                    <div class="project-image">
+                        <img src="images/Donny.png" alt="Donny and Dinna" />
+                    </div>
+                    <div class="project-info">
+                        <h3>Donny &amp; Dinna</h3>
+                        <div class="project-tags">
+                            <span class="tag">Unity</span>
+                            <span class="tag">C#</span>
+                            <span class="tag">Co-op</span>
+                            <span class="tag">Puzzle</span>
+                        </div>
+                        <p>
+                            A cooperative puzzle game for two players who must work together to solve oxygen-recovery challenges. Communication and coordination are everything.
+                        </p>
+                        <a href="https://ultimatewinner.itch.io/donnydinna" target="_blank">View Project</a>
+                    </div>
+                </div>
 
-		<a id="view-more-projects" href="#">View More Projects</a>
-		<div id="more-projects" class="row">
-    		<div class="project shadow-large">
-        		<div class="project-image">
-            		<img src="images/Mateo.png" />
-        		</div>
-                    <!-- End .project-image -->
-        	<div class="project-info">
-            <h3>Mateo una Aventura Jurasica</h3>
-            <p>
-                A time traveling child that has to collect all ancient stones to come back to the present! Help all the dinosaurs and use the stones in the ancient statue to get back to the present.
-            </p>
-            <a href="https://ultimatewinner.itch.io/mateo-una-aventura-jurasica">View Project</a>
-        </div>
-        <!-- End .project-info -->	
-    </div>
-    <!-- End .project -->
-</div>
-                <!-- End .project -->
+                <a id="view-more-projects" href="#">View More Projects</a>
+                <div id="more-projects" class="row">
+                    <div class="project shadow-large">
+                        <div class="project-image">
+                            <img src="images/Mateo.png" alt="Mateo una Aventura Jurasica" />
+                        </div>
+                        <div class="project-info">
+                            <h3>Mateo: Una Aventura Jurásica</h3>
+                            <div class="project-tags">
+                                <span class="tag">Unity</span>
+                                <span class="tag">C#</span>
+                                <span class="tag">Adventure</span>
+                                <span class="tag">Puzzle</span>
+                            </div>
+                            <p>
+                                A time-traveling child must collect ancient stones to return to the present. Help the dinosaurs and solve puzzles using the ancient statue to find your way home.
+                            </p>
+                            <a href="https://ultimatewinner.itch.io/mateo-una-aventura-jurasica" target="_blank">View Project</a>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
-    <!-- End #projects -->
+
+    <div id="code-samples">
+        <h2 class="heading">Code Samples</h2>
+        <p class="section-subtitle">Production-ready Unity C# — written for clarity and performance</p>
+        <div class="container">
+            <div class="code-tabs">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="tab1" data-file="NetworkInteractionTool.cs">
+                        <i class="fa fa-wifi"></i> Networked Raycast Tool
+                    </button>
+                    <button class="tab-btn" data-tab="tab2" data-file="ObjectPool.cs">
+                        <i class="fa fa-recycle"></i> Generic Object Pool
+                    </button>
+                    <button class="tab-btn" data-tab="tab3" data-file="AbilityController.cs">
+                        <i class="fa fa-bolt"></i> ScriptableObject Ability System
+                    </button>
+                </div>
+
+                <div id="tab1" class="tab-content active">
+                    <div class="code-window-chrome">
+                        <span class="dot dot-red"></span>
+                        <span class="dot dot-yellow"></span>
+                        <span class="dot dot-green"></span>
+                        <span class="code-window-title">NetworkInteractionTool.cs</span>
+                    </div>
+                    <div class="code-header">
+                        <div class="code-meta">
+                            <span class="code-lang">C# &middot; Unity Netcode for GameObjects</span>
+                            <span class="code-filename">NetworkBehaviour + ServerRpc + ClientRpc</span>
+                        </div>
+                        <p class="code-desc">A multiplayer interaction tool that fires raycasts from a held object. The owner client gets immediate local feedback while the server validates hits and broadcasts visual effects to all other clients via <code>ClientRpc</code>. Uses a queue to flush pending effects each frame without allocs.</p>
+                    </div>
+                    <pre><code class="language-csharp">using System.Collections.Generic;
+using Unity.Netcode;
+using UnityEngine;
+
+public class NetworkInteractionTool : NetworkBehaviour
+{
+    [SerializeField] private Transform      muzzle;
+    [SerializeField] private float          range      = 18f;
+    [SerializeField] private float          fireRate   = 0.15f;
+    [SerializeField] private LayerMask      hitMask;
+    [SerializeField] private LineRenderer   scanBeam;
+    [SerializeField] private ParticleSystem hitParticles;
+
+    private float _nextFireTime;
+
+    private readonly Queue&lt;(Vector3 from, Vector3 to, bool hit)&gt; _effectQueue = new();
+
+    private void Update()
+    {
+        FlushEffectQueue();
+
+        if (!IsOwner || !Input.GetButton("Fire1") || Time.time &lt; _nextFireTime)
+            return;
+
+        _nextFireTime = Time.time + fireRate;
+
+        Vector3 origin    = muzzle.position;
+        Vector3 direction = muzzle.forward;
+        bool    didHit    = Physics.Raycast(origin, direction, out RaycastHit local, range, hitMask);
+
+        _effectQueue.Enqueue((origin, didHit ? local.point : origin + direction * range, didHit));
+
+        SubmitRaycastServerRpc(origin, direction);
+    }
+
+    [ServerRpc]
+    private void SubmitRaycastServerRpc(Vector3 origin, Vector3 direction)
+    {
+        bool hit = Physics.Raycast(origin, direction, out RaycastHit info, range, hitMask);
+
+        if (hit && info.collider.TryGetComponent(out IInteractable interactable))
+            interactable.Interact(OwnerClientId);
+
+        Vector3 endpoint = hit ? info.point : origin + direction * range;
+        BroadcastEffectsClientRpc(origin, endpoint, hit);
+    }
+
+    [ClientRpc]
+    private void BroadcastEffectsClientRpc(Vector3 origin, Vector3 endpoint, bool hit)
+    {
+        if (IsOwner) return;
+        _effectQueue.Enqueue((origin, endpoint, hit));
+    }
+
+    private void FlushEffectQueue()
+    {
+        while (_effectQueue.Count > 0)
+        {
+            var (from, to, hit) = _effectQueue.Dequeue();
+            ShowBeam(from, to);
+            if (hit) ShowHitEffect(to);
+        }
+    }
+
+    private void ShowBeam(Vector3 from, Vector3 to)
+    {
+        scanBeam.enabled = true;
+        scanBeam.SetPositions(new[] { from, to });
+        CancelInvoke(nameof(HideBeam));
+        Invoke(nameof(HideBeam), 0.08f);
+    }
+
+    private void HideBeam()               => scanBeam.enabled = false;
+    private void ShowHitEffect(Vector3 at) => hitParticles.transform.position = at;
+}</code></pre>
+                </div>
+
+                <div id="tab2" class="tab-content">
+                    <div class="code-window-chrome">
+                        <span class="dot dot-red"></span>
+                        <span class="dot dot-yellow"></span>
+                        <span class="dot dot-green"></span>
+                        <span class="code-window-title">ObjectPool.cs</span>
+                    </div>
+                    <div class="code-header">
+                        <div class="code-meta">
+                            <span class="code-lang">C# &middot; Unity · Generic Systems</span>
+                            <span class="code-filename">Stack-based O(1) pooler</span>
+                        </div>
+                        <p class="code-desc">A generic, GC-friendly object pool that pre-allocates a reusable set of <code>Component</code> instances. <code>ProjectilePool</code> shows the concrete usage pattern with a singleton facade — so callers never touch the pool API directly.</p>
+                    </div>
+                    <pre><code class="language-csharp">using System.Collections.Generic;
+using UnityEngine;
+
+public sealed class ObjectPool&lt;T&gt; where T : Component
+{
+    private readonly T        _prefab;
+    private readonly Transform _root;
+    private readonly Stack&lt;T&gt;  _pool = new();
+
+    public int ActiveCount { get; private set; }
+
+    public ObjectPool(T prefab, int warmup = 0, Transform root = null)
+    {
+        _prefab = prefab;
+        _root   = root;
+
+        for (int i = 0; i < warmup; i++)
+            _pool.Push(Spawn());
+    }
+
+    public T Get(Vector3 position, Quaternion rotation)
+    {
+        T obj = _pool.Count > 0 ? _pool.Pop() : Spawn();
+        obj.transform.SetPositionAndRotation(position, rotation);
+        obj.gameObject.SetActive(true);
+        ActiveCount++;
+        return obj;
+    }
+
+    public void Return(T obj)
+    {
+        obj.gameObject.SetActive(false);
+        _pool.Push(obj);
+        ActiveCount--;
+    }
+
+    public void Prewarm(int count)
+    {
+        for (int i = 0; i < count; i++)
+            _pool.Push(Spawn());
+    }
+
+    private T Spawn()
+    {
+        T obj = Object.Instantiate(_prefab, _root);
+        obj.gameObject.SetActive(false);
+        return obj;
+    }
+}
+
+public class ProjectilePool : MonoBehaviour
+{
+    [SerializeField] private Projectile prefab;
+    [SerializeField] private int        warmupSize = 20;
+
+    private ObjectPool&lt;Projectile&gt; _pool;
+
+    public static ProjectilePool Instance { get; private set; }
+
+    private void Awake()
+    {
+        Instance = this;
+        _pool    = new ObjectPool&lt;Projectile&gt;(prefab, warmupSize, transform);
+    }
+
+    public Projectile Get(Vector3 position, Quaternion rotation)
+        => _pool.Get(position, rotation);
+
+    public void Return(Projectile p) => _pool.Return(p);
+}</code></pre>
+                </div>
+
+                <div id="tab3" class="tab-content">
+                    <div class="code-window-chrome">
+                        <span class="dot dot-red"></span>
+                        <span class="dot dot-yellow"></span>
+                        <span class="dot dot-green"></span>
+                        <span class="code-window-title">AbilityController.cs</span>
+                    </div>
+                    <div class="code-header">
+                        <div class="code-meta">
+                            <span class="code-lang">C# &middot; Unity · ScriptableObject Architecture</span>
+                            <span class="code-filename">Data-driven ability system</span>
+                        </div>
+                        <p class="code-desc">A data-driven ability system using ScriptableObjects for ability definitions. <code>AbilityContext</code> is a readonly struct (zero-GC context passing), <code>AbilitySlot</code> owns runtime state while the definition stays immutable. The controller resolves aim point via camera raycast and feeds it into each slot each frame.</p>
+                    </div>
+                    <pre><code class="language-csharp">using UnityEngine;
+
+[CreateAssetMenu(menuName = "Abilities/Definition")]
+public abstract class AbilityDefinition : ScriptableObject
+{
+    [field: SerializeField] public string AbilityName { get; private set; }
+    [field: SerializeField] public float  Cooldown    { get; private set; } = 1f;
+    [field: SerializeField] public float  EnergyCost  { get; private set; } = 10f;
+    [field: SerializeField] public Sprite Icon        { get; private set; }
+
+    public abstract void Execute(in AbilityContext ctx);
+
+    public bool CanActivate(float energy) => energy >= EnergyCost;
+}
+
+public readonly struct AbilityContext
+{
+    public readonly Transform  Origin;
+    public readonly Vector3    AimPoint;
+    public readonly LayerMask  TargetMask;
+
+    public AbilityContext(Transform origin, Vector3 aimPoint, LayerMask mask)
+    {
+        Origin     = origin;
+        AimPoint   = aimPoint;
+        TargetMask = mask;
+    }
+}
+
+public class AbilitySlot
+{
+    public AbilityDefinition Definition        { get; }
+    public float             CooldownRemaining { get; private set; }
+    public bool              IsReady           => CooldownRemaining <= 0f;
+
+    public AbilitySlot(AbilityDefinition definition) => Definition = definition;
+
+    public void Tick(float delta) => CooldownRemaining = Mathf.Max(0f, CooldownRemaining - delta);
+
+    public bool TryActivate(in AbilityContext ctx, ref float energy)
+    {
+        if (!IsReady || !Definition.CanActivate(energy)) return false;
+
+        energy            -= Definition.EnergyCost;
+        CooldownRemaining  = Definition.Cooldown;
+        Definition.Execute(ctx);
+        return true;
+    }
+}
+
+public class AbilityController : MonoBehaviour
+{
+    [SerializeField] private AbilityDefinition[] slotDefinitions;
+    [SerializeField] private LayerMask           aimMask;
+    [SerializeField] private float               maxEnergy   = 100f;
+    [SerializeField] private float               energyRegen = 8f;
+
+    private static readonly KeyCode[] SlotKeys = { KeyCode.Q, KeyCode.E, KeyCode.R, KeyCode.F };
+
+    private AbilitySlot[] _slots;
+    private float         _energy;
+    private Camera        _cam;
+
+    private void Awake()
+    {
+        _cam    = Camera.main;
+        _energy = maxEnergy;
+        _slots  = new AbilitySlot[slotDefinitions.Length];
+
+        for (int i = 0; i < slotDefinitions.Length; i++)
+            _slots[i] = new AbilitySlot(slotDefinitions[i]);
+    }
+
+    private void Update()
+    {
+        _energy = Mathf.Min(_energy + energyRegen * Time.deltaTime, maxEnergy);
+
+        AbilityContext ctx = BuildContext();
+
+        for (int i = 0; i < _slots.Length; i++)
+        {
+            _slots[i].Tick(Time.deltaTime);
+
+            if (i < SlotKeys.Length && Input.GetKeyDown(SlotKeys[i]))
+                _slots[i].TryActivate(ctx, ref _energy);
+        }
+    }
+
+    private AbilityContext BuildContext()
+    {
+        Ray     ray      = _cam.ScreenPointToRay(Input.mousePosition);
+        bool    didHit   = Physics.Raycast(ray, out RaycastHit hit, 100f, aimMask);
+        Vector3 aimPoint = didHit ? hit.point : ray.origin + ray.direction * 50f;
+
+        return new AbilityContext(transform, aimPoint, aimMask);
+    }
+}</code></pre>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <div id="skills">
         <h2 class="heading">Skills</h2>
-        <ul>
-            <li>C#</li>
-            <li>C++</li>
-            <li>Unity</li>
-            <li>Unreal Engine</li>
-            <li>Level Design</li>
-            <li>Game Balancing</li>
-            <li>Blueprints(UE)</li>
-            <li>Blender</li>
-            <li>Adobe Photoshop</li>
-            <li>Adobe Illustrator</li>
-            <li>Teamwork</li>
-            <li>Adaptability</li>
-            <li>Quick Learner</li>
-            <li>Leadership</li>
-        </ul>
+        <div class="skills-grid container">
+
+            <div class="skill-category reveal">
+                <h3><i class="fa fa-code"></i> Languages</h3>
+                <ul>
+                    <li>C#</li>
+                    <li>C++</li>
+                </ul>
+            </div>
+
+            <div class="skill-category reveal">
+                <h3><i class="fa fa-gamepad"></i> Game Engines</h3>
+                <ul>
+                    <li>Unity</li>
+                    <li>Unreal Engine</li>
+                    <li>Blueprints (UE)</li>
+                </ul>
+            </div>
+
+            <div class="skill-category reveal">
+                <h3><i class="fa fa-cogs"></i> Specialties</h3>
+                <ul>
+                    <li>Multiplayer / Netcode</li>
+                    <li>VR Development</li>
+                    <li>Gameplay Systems</li>
+                    <li>Level Design</li>
+                    <li>Game Balancing</li>
+                    <li>AI Programming</li>
+                </ul>
+            </div>
+
+            <div class="skill-category reveal">
+                <h3><i class="fa fa-wrench"></i> Tools</h3>
+                <ul>
+                    <li>Blender</li>
+                    <li>Adobe Photoshop</li>
+                    <li>Adobe Illustrator</li>
+                    <li>Git</li>
+                </ul>
+            </div>
+
+            <div class="skill-category reveal">
+                <h3><i class="fa fa-users"></i> Soft Skills</h3>
+                <ul>
+                    <li>Teamwork</li>
+                    <li>Adaptability</li>
+                    <li>Quick Learner</li>
+                    <li>Leadership</li>
+                </ul>
+            </div>
+
+        </div>
     </div>
-    <!-- End #skills -->
 
     <div id="contact">
         <h2>Get in Touch</h2>
@@ -244,17 +623,13 @@
                 <button type="submit">Send</button>
             </form>
         </div>
-        <!-- End #contact-form -->
     </div>
-    <!-- End #contact -->
 
     <footer>
         <div class="container">
             <div class="row">
                 <div class="col-sm-5 copyright">
-                    <p>
-                        Copyright &copy; <span id="current-year">2023</span> Victor Rosas
-                    </p>
+                    <p>Copyright &copy; <span id="current-year">2024</span> Victor Rosas</p>
                 </div>
                 <div class="col-sm-2 top">
                     <span id="to-top">
@@ -269,15 +644,191 @@
                         <li>
                             <a href="https://www.linkedin.com/in/skyreeder/?locale=en_US" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
                         </li>
+                        <li>
+                            <a href="https://ultimatewinner.itch.io/" target="_blank"><i class="fa fa-gamepad" aria-hidden="true"></i></a>
+                        </li>
                     </ul>
                 </div>
             </div>
         </div>
     </footer>
-    <!-- End footer -->
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="js/scripts.min.js"></script>
+    <script>
+        // ── Syntax highlighting ──────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            hljs.highlightAll();
+        });
+
+        // ── Code sample tabs ─────────────────────────────────────────────────
+        document.querySelectorAll('.tab-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var tabId = this.getAttribute('data-tab');
+                document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+                document.querySelectorAll('.tab-content').forEach(function (c) { c.classList.remove('active'); });
+                this.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+                document.getElementById(tabId).querySelectorAll('code').forEach(function (el) {
+                    hljs.highlightElement(el);
+                });
+            });
+        });
+
+        // ── Typing animation ─────────────────────────────────────────────────
+        (function () {
+            var el      = document.getElementById('typed-subtitle');
+            var phrases = ['Gameplay Programmer', 'Unity & C# Engineer', 'Multiplayer Systems Dev', 'VR Developer'];
+            var idx     = 0;
+            var charIdx = 0;
+            var deleting = false;
+
+            function tick() {
+                var phrase = phrases[idx];
+                if (deleting) {
+                    el.textContent = phrase.substring(0, charIdx - 1);
+                    charIdx--;
+                } else {
+                    el.textContent = phrase.substring(0, charIdx + 1);
+                    charIdx++;
+                }
+                if (!deleting && charIdx === phrase.length) {
+                    deleting = true;
+                    return setTimeout(tick, 2200);
+                }
+                if (deleting && charIdx === 0) {
+                    deleting = false;
+                    idx      = (idx + 1) % phrases.length;
+                    return setTimeout(tick, 400);
+                }
+                setTimeout(tick, deleting ? 45 : 80);
+            }
+            setTimeout(tick, 1000);
+        })();
+
+        // ── Hero particles ───────────────────────────────────────────────────
+        (function () {
+            var canvas = document.getElementById('particles');
+            if (!canvas) return;
+            var ctx   = canvas.getContext('2d');
+            var nodes = [];
+
+            function resize() {
+                canvas.width  = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+            }
+
+            function Node() {
+                this.x  = Math.random() * canvas.width;
+                this.y  = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.35;
+                this.vy = (Math.random() - 0.5) * 0.35;
+                this.r  = Math.random() * 1.4 + 0.4;
+                this.a  = Math.random() * 0.45 + 0.15;
+            }
+
+            Node.prototype.update = function () {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            };
+
+            Node.prototype.draw = function () {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(147,197,253,' + this.a + ')';
+                ctx.fill();
+            };
+
+            function init() {
+                resize();
+                nodes = [];
+                var count = Math.min(80, Math.floor((canvas.width * canvas.height) / 9000));
+                for (var i = 0; i < count; i++) nodes.push(new Node());
+            }
+
+            function drawEdges() {
+                for (var i = 0; i < nodes.length; i++) {
+                    for (var j = i + 1; j < nodes.length; j++) {
+                        var dx   = nodes[i].x - nodes[j].x;
+                        var dy   = nodes[i].y - nodes[j].y;
+                        var dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 110) {
+                            ctx.beginPath();
+                            ctx.moveTo(nodes[i].x, nodes[i].y);
+                            ctx.lineTo(nodes[j].x, nodes[j].y);
+                            ctx.strokeStyle = 'rgba(147,197,253,' + (0.1 * (1 - dist / 110)) + ')';
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                nodes.forEach(function (n) { n.update(); n.draw(); });
+                drawEdges();
+                requestAnimationFrame(animate);
+            }
+
+            window.addEventListener('resize', init);
+            init();
+            animate();
+        })();
+
+        // ── Stats counter animation ──────────────────────────────────────────
+        (function () {
+            var counters = document.querySelectorAll('[data-count]');
+            var animated = false;
+
+            function runCounters() {
+                if (animated) return;
+                animated = true;
+                counters.forEach(function (el) {
+                    var target   = parseInt(el.getAttribute('data-count'));
+                    var suffix   = el.getAttribute('data-suffix') || '';
+                    var start    = null;
+                    var duration = 1400;
+                    function step(ts) {
+                        if (!start) start = ts;
+                        var progress = Math.min((ts - start) / duration, 1);
+                        var eased    = 1 - Math.pow(1 - progress, 3);
+                        el.textContent = Math.floor(eased * target) + suffix;
+                        if (progress < 1) requestAnimationFrame(step);
+                    }
+                    requestAnimationFrame(step);
+                });
+            }
+
+            var statsEl = document.getElementById('stats');
+            if (statsEl && 'IntersectionObserver' in window) {
+                new IntersectionObserver(function (entries, obs) {
+                    entries.forEach(function (e) {
+                        if (e.isIntersecting) { runCounters(); obs.disconnect(); }
+                    });
+                }, { threshold: 0.3 }).observe(statsEl);
+            }
+        })();
+
+        // ── Scroll-reveal ────────────────────────────────────────────────────
+        (function () {
+            if (!('IntersectionObserver' in window)) return;
+            var obs = new IntersectionObserver(function (entries) {
+                entries.forEach(function (e) {
+                    if (e.isIntersecting) e.target.classList.add('revealed');
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.reveal').forEach(function (el) { obs.observe(el); });
+        })();
+
+        // ── Copyright year ───────────────────────────────────────────────────
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
 </body>
 
 </html>

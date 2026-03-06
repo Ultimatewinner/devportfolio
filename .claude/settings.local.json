@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \":*)",
+      "Bash(node -e \":*)",
+      "Bash(powershell -command \":*)",
+      "Bash(powershell -command \"Get-Content ''C:/Users/Dataverso/Downloads/Victor_Rosas_Resume.pdf'' -Encoding Byte | ForEach-Object { [char]$_} | Where-Object { $_-match ''[\\\\x20-\\\\x7E]'' } | Join-String\")",
+      "Bash(powershell -command \"[System.IO.File]::ReadAllText\\(''C:/Users/Dataverso/Downloads/Victor_Rosas_Resume.pdf''\\) -replace ''[^\\\\x20-\\\\x7E\\\\r\\\\n]+'', '' ''\")",
+      "Bash(powershell -File \"C:/Users/Dataverso/extract_pdf.ps1\")",
+      "Bash(powershell -ExecutionPolicy Bypass -File \"C:/Users/Dataverso/extract_pdf.ps1\")",
+      "Bash(node \"C:/Users/Dataverso/extract_pdf.js\")",
+      "Bash(node \"C:/Users/Dataverso/extract_all.js\")"
+    ]
+  }
+}
