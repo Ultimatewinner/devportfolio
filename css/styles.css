@@ -1189,3 +1189,83 @@ footer {
 .optional-section-block p,
 .optional-section-block ul { margin:0 0 15px; color:#74808a; font-size:.9em; }
 .optional-section-block ul { padding:0 0 0 15px; }
+
+/* ── Always-Dark Mode ──────────────────────────────────────────────── */
+
+body {
+    color: var(--text);
+    background: var(--dark);
+}
+
+#mobile-menu-open  { background: rgba(10, 15, 30, 0.85); }
+#mobile-menu-close { background: rgba(10, 15, 30, 0.95); }
+
+.heading { color: var(--text); }
+
+.background-alt { background: var(--dark-2); }
+
+/* About */
+#about { border-bottom-color: var(--dark-border); }
+#about h2 { color: var(--text); }
+#about p  { color: #94a3b8; }
+
+/* Experience */
+#experience { border-bottom-color: var(--dark-border); }
+#experience h2 { color: var(--text); }
+
+.vtimeline-content {
+    background: var(--dark-card);
+    border-color: var(--dark-border);
+}
+.vtimeline-content h3 { color: var(--text); }
+.vtimeline-content ul { color: #94a3b8; }
+
+/* Education */
+#education { border-bottom-color: var(--dark-border); }
+#education h2 { color: var(--text); }
+
+.education-block {
+    background: var(--dark-card);
+    border-color: var(--dark-border);
+}
+.education-block h3 { color: var(--text); }
+.education-block p  { color: #94a3b8; }
+
+/* Projects */
+#projects { border-bottom-color: var(--dark-border); }
+#projects h2 { color: var(--text); }
+
+.project {
+    background: var(--dark-card);
+    border-color: var(--dark-border);
+}
+.project::before {
+    background: linear-gradient(135deg, rgba(6,182,212,0.04) 0%, transparent 60%);
+}
+.project:hover {
+    box-shadow: 0 12px 40px rgba(6,182,212,0.12), 0 0 0 1px rgba(6,182,212,0.15);
+    border-color: rgba(6,182,212,0.25);
+}
+.project-info h3 { color: var(--text); }
+.project-info p  { color: #94a3b8; }
+
+/* Skills */
+#skills {
+    background: var(--dark-2);
+    border-bottom-color: var(--dark-border);
+}
+#skills h2 { color: var(--text); }
+
+.skill-category {
+    background: var(--dark-card);
+    border-color: var(--dark-border);
+}
+.skill-category:hover {
+    box-shadow: 0 10px 30px rgba(6,182,212,0.1);
+    border-color: rgba(6,182,212,0.2);
+}
+.skill-category h3 { border-bottom-color: var(--dark-border); }
+.skill-category li {
+    color: #94a3b8;
+    border-bottom-color: rgba(30, 58, 95, 0.45);
+}
