@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Victor Rosas | Gameplay Programmer</title>
+    <title>Victor Rosas | VR & Multiplayer Programmer</title>
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
@@ -38,16 +38,19 @@
     <div id="lead">
         <canvas id="particles"></canvas>
         <div id="lead-content">
-            <h1>Victor Rosas</h1>
-            <h2 id="typed-subtitle">Gameplay Programmer</h2>
-            <p class="lead-tagline">
-                <span>4+ Years Experience</span>
-                <span class="divider">|</span>
-                <span>Unity &amp; C#</span>
-                <span class="divider">|</span>
-                <span>Multiplayer Systems</span>
-            </p>
-            <a href="Resume/CurriculumVictor.pdf" download="Victor_Rosas_CV.pdf" class="btn-rounded-white">Download CV</a>
+            <div id="lead-text">
+                <h1 data-text="Victor Rosas">Victor Rosas</h1>
+                <h2 id="typed-subtitle">VR & Multiplayer Programmer</h2>
+                <p class="lead-tagline">
+                    <span>4+ Years Experience</span>
+                    <span class="divider">|</span>
+                    <span>Unity &amp; C#</span>
+                    <span class="divider">|</span>
+                    <span>VR &amp; Multiplayer</span>
+                </p>
+                <a href="Resume/CurriculumVictor.pdf" download="Victor_Rosas_CV.pdf" class="btn-rounded-white">Download CV</a>
+            </div>
+            <div id="vr-scene-container"></div>
         </div>
         <div id="lead-overlay"></div>
         <div id="lead-down">
@@ -821,6 +824,7 @@ public sealed class SaveSystem
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="js/scripts.min.js"></script>
     <script>
         // ── Syntax highlighting ──────────────────────────────────────────────
@@ -845,7 +849,7 @@ public sealed class SaveSystem
         // ── Typing animation ─────────────────────────────────────────────────
         (function () {
             var el      = document.getElementById('typed-subtitle');
-            var phrases = ['Gameplay Programmer', 'Unity & C# Engineer', 'Multiplayer Systems Dev', 'VR Developer'];
+            var phrases = ['VR & Multiplayer Programmer', 'Unity & C# Engineer', 'Quest 3 Developer', 'Gameplay Architect'];
             var idx     = 0;
             var charIdx = 0;
             var deleting = false;
@@ -873,17 +877,36 @@ public sealed class SaveSystem
             setTimeout(tick, 1000);
         })();
 
-        // ── Hero particles ───────────────────────────────────────────────────
+        // ── Hero particles (enhanced with mouse + dual colors) ────────────────
         (function () {
             var canvas = document.getElementById('particles');
             if (!canvas) return;
             var ctx   = canvas.getContext('2d');
             var nodes = [];
+            var mouse = { x: -9999, y: -9999 };
+            var REPULSE_DIST = 120;
+
+            canvas.style.pointerEvents = 'auto';
+            canvas.addEventListener('mousemove', function (e) {
+                var rect = canvas.getBoundingClientRect();
+                mouse.x = e.clientX - rect.left;
+                mouse.y = e.clientY - rect.top;
+            });
+            canvas.addEventListener('mouseleave', function () {
+                mouse.x = -9999;
+                mouse.y = -9999;
+            });
 
             function resize() {
                 canvas.width  = canvas.offsetWidth;
                 canvas.height = canvas.offsetHeight;
             }
+
+            var COLORS = [
+                [147, 197, 253],  // blue
+                [6, 182, 212],    // cyan
+                [224, 64, 251],   // magenta
+            ];
 
             function Node() {
                 this.x  = Math.random() * canvas.width;
@@ -892,9 +915,28 @@ public sealed class SaveSystem
                 this.vy = (Math.random() - 0.5) * 0.35;
                 this.r  = Math.random() * 1.4 + 0.4;
                 this.a  = Math.random() * 0.45 + 0.15;
+                this.c  = COLORS[Math.floor(Math.random() * COLORS.length)];
             }
 
             Node.prototype.update = function () {
+                // Mouse repulse
+                var dx = this.x - mouse.x;
+                var dy = this.y - mouse.y;
+                var dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < REPULSE_DIST && dist > 0) {
+                    var force = (REPULSE_DIST - dist) / REPULSE_DIST * 0.8;
+                    this.vx += (dx / dist) * force;
+                    this.vy += (dy / dist) * force;
+                }
+
+                // Damping
+                this.vx *= 0.98;
+                this.vy *= 0.98;
+
+                // Clamp speed
+                var speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                if (speed > 2) { this.vx = (this.vx / speed) * 2; this.vy = (this.vy / speed) * 2; }
+
                 this.x += this.vx;
                 this.y += this.vy;
                 if (this.x < 0) this.x = canvas.width;
@@ -906,14 +948,14 @@ public sealed class SaveSystem
             Node.prototype.draw = function () {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(147,197,253,' + this.a + ')';
+                ctx.fillStyle = 'rgba(' + this.c[0] + ',' + this.c[1] + ',' + this.c[2] + ',' + this.a + ')';
                 ctx.fill();
             };
 
             function init() {
                 resize();
                 nodes = [];
-                var count = Math.min(80, Math.floor((canvas.width * canvas.height) / 9000));
+                var count = Math.min(90, Math.floor((canvas.width * canvas.height) / 8000));
                 for (var i = 0; i < count; i++) nodes.push(new Node());
             }
 
@@ -923,11 +965,12 @@ public sealed class SaveSystem
                         var dx   = nodes[i].x - nodes[j].x;
                         var dy   = nodes[i].y - nodes[j].y;
                         var dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist < 110) {
+                        if (dist < 120) {
+                            var alpha = 0.12 * (1 - dist / 120);
                             ctx.beginPath();
                             ctx.moveTo(nodes[i].x, nodes[i].y);
                             ctx.lineTo(nodes[j].x, nodes[j].y);
-                            ctx.strokeStyle = 'rgba(147,197,253,' + (0.1 * (1 - dist / 110)) + ')';
+                            ctx.strokeStyle = 'rgba(147,197,253,' + alpha + ')';
                             ctx.lineWidth = 0.5;
                             ctx.stroke();
                         }
@@ -990,6 +1033,137 @@ public sealed class SaveSystem
                 });
             }, { threshold: 0.1 });
             document.querySelectorAll('.reveal').forEach(function (el) { obs.observe(el); });
+        })();
+
+        // ── 3D Holographic VR Headset ────────────────────────────────────────
+        (function () {
+            var container = document.getElementById('vr-scene-container');
+            if (!container || typeof THREE === 'undefined') return;
+
+            var scene = new THREE.Scene();
+            var w = container.clientWidth || 380, h = container.clientHeight || 380;
+            var camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 100);
+            camera.position.set(0, 0.2, 5);
+
+            var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(w, h);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            // Materials
+            var cyanLine = new THREE.LineBasicMaterial({ color: 0x06b6d4 });
+            var magentaLine = new THREE.LineBasicMaterial({ color: 0xe040fb });
+            var cyanFace = new THREE.MeshBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.04, side: THREE.DoubleSide });
+            var magentaFace = new THREE.MeshBasicMaterial({ color: 0xe040fb, transparent: true, opacity: 0.03, side: THREE.DoubleSide });
+
+            var headset = new THREE.Group();
+
+            // Main body
+            var bodyGeo = new THREE.BoxGeometry(2.8, 1.4, 1.2, 2, 2, 2);
+            headset.add(new THREE.LineSegments(new THREE.EdgesGeometry(bodyGeo), cyanLine));
+            headset.add(new THREE.Mesh(bodyGeo, cyanFace));
+
+            // Front visor plate
+            var visorGeo = new THREE.BoxGeometry(3.0, 1.2, 0.12);
+            var visorLines = new THREE.LineSegments(new THREE.EdgesGeometry(visorGeo), magentaLine);
+            visorLines.position.z = 0.66;
+            headset.add(visorLines);
+            var visorMesh = new THREE.Mesh(visorGeo, magentaFace);
+            visorMesh.position.z = 0.66;
+            headset.add(visorMesh);
+
+            // Left lens
+            var lensRingGeo = new THREE.TorusGeometry(0.35, 0.04, 8, 32);
+            var leftLens = new THREE.LineSegments(new THREE.EdgesGeometry(lensRingGeo), cyanLine);
+            leftLens.position.set(-0.55, 0, 0.73);
+            headset.add(leftLens);
+            var lensFill = new THREE.Mesh(
+                new THREE.CircleGeometry(0.35, 32),
+                new THREE.MeshBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.08, side: THREE.DoubleSide })
+            );
+            lensFill.position.set(-0.55, 0, 0.74);
+            headset.add(lensFill);
+
+            // Right lens
+            var rightLens = leftLens.clone();
+            rightLens.position.set(0.55, 0, 0.73);
+            headset.add(rightLens);
+            var rightFill = lensFill.clone();
+            rightFill.position.set(0.55, 0, 0.74);
+            headset.add(rightFill);
+
+            // Head strap (curved band around back)
+            var strapCurve = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(-1.4, 0, -0.6),
+                new THREE.Vector3(-1.7, 0, -1.4),
+                new THREE.Vector3(0, 0, -2.0),
+                new THREE.Vector3(1.7, 0, -1.4),
+                new THREE.Vector3(1.4, 0, -0.6)
+            ]);
+            var strapGeo = new THREE.TubeGeometry(strapCurve, 32, 0.05, 8, false);
+            headset.add(new THREE.LineSegments(new THREE.EdgesGeometry(strapGeo), magentaLine));
+
+            // Top strap
+            var topCurve = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(0, 0.7, 0),
+                new THREE.Vector3(0, 1.0, -0.7),
+                new THREE.Vector3(0, 0.85, -1.4),
+                new THREE.Vector3(0, 0.35, -1.9)
+            ]);
+            var topGeo = new THREE.TubeGeometry(topCurve, 20, 0.04, 8, false);
+            headset.add(new THREE.LineSegments(new THREE.EdgesGeometry(topGeo), cyanLine));
+
+            // Camera sensors (small cubes on front corners)
+            var sensorGeo = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+            [[-1.25, 0.48, 0.68], [1.25, 0.48, 0.68], [-1.25, -0.48, 0.68], [1.25, -0.48, 0.68]].forEach(function (pos) {
+                var s = new THREE.LineSegments(new THREE.EdgesGeometry(sensorGeo), magentaLine);
+                s.position.set(pos[0], pos[1], pos[2]);
+                headset.add(s);
+            });
+
+            // Initial rotation for a nice 3/4 view
+            headset.rotation.set(0.12, -0.4, 0);
+            scene.add(headset);
+
+            // Mouse tracking for interactive rotation
+            var mouseX = 0, mouseY = 0;
+            document.addEventListener('mousemove', function (e) {
+                mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+                mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+            });
+
+            // Animation loop
+            var clock = new THREE.Clock();
+            function animate() {
+                requestAnimationFrame(animate);
+                var t = clock.getElapsedTime();
+
+                // Slow idle rotation + mouse influence
+                headset.rotation.y = -0.4 + Math.sin(t * 0.3) * 0.25 + mouseX * 0.2;
+                headset.rotation.x = 0.12 + Math.sin(t * 0.5) * 0.06 + mouseY * 0.1;
+
+                // Floating motion
+                headset.position.y = Math.sin(t * 0.8) * 0.08;
+
+                // Rare holographic glitch
+                if (Math.random() < 0.002) {
+                    headset.position.x = (Math.random() - 0.5) * 0.12;
+                    setTimeout(function () { headset.position.x = 0; }, 60);
+                }
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // Responsive resize
+            window.addEventListener('resize', function () {
+                var nw = container.clientWidth, nh = container.clientHeight;
+                if (nw && nh) {
+                    camera.aspect = nw / nh;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(nw, nh);
+                }
+            });
         })();
 
         // ── Copyright year ───────────────────────────────────────────────────

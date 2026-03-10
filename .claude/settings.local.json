@@ -9,7 +9,23 @@
       "Bash(powershell -File \"C:/Users/Dataverso/extract_pdf.ps1\")",
       "Bash(powershell -ExecutionPolicy Bypass -File \"C:/Users/Dataverso/extract_pdf.ps1\")",
       "Bash(node \"C:/Users/Dataverso/extract_pdf.js\")",
-      "Bash(node \"C:/Users/Dataverso/extract_all.js\")"
+      "Bash(node \"C:/Users/Dataverso/extract_all.js\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where npx)",
+      "Bash(where node)",
+      "Bash(where npm)",
+      "Bash(where python)",
+      "Bash(where npx.cmd)",
+      "Bash(where npm.cmd)",
+      "Bash(where node.exe)",
+      "Bash(cmd /c \"where node\")",
+      "Bash(cmd /c \"where npx\")",
+      "Bash(cmd /c \"where npm\")",
+      "Bash(cmd /c \"where python\")",
+      "Bash(node --version)",
+      "Bash(npx --version)",
+      "Bash(npm --version)",
+      "Bash(powershell.exe -Command \"Get-Command node -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source; Get-Command npx -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source; Get-Command npm -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\")"
     ]
   }
 }
