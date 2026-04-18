@@ -1,12 +1,14 @@
 // Code samples: 4 stories with tabs and problem/approach/constraint structure
 
-// Syntax-highlighting token components (MUST be capitalized, since React treats lowercase as HTML)
 function Kw({ children }) { return <span style={{color:'#c58dff'}}>{children}</span>; }
 function Ty({ children }) { return <span style={{color:'#7dcfff'}}>{children}</span>; }
 function Fn({ children }) { return <span style={{color:'#ff6a3d'}}>{children}</span>; }
 function Nm({ children }) { return <span style={{color:'#ff9e64'}}>{children}</span>; }
 
 function CineCode() {
+  const isMobile = useIsMobile();
+  const px = isMobile ? '24px' : '56px';
+
   const samples = [
     {
       id: 'lag',
@@ -113,8 +115,8 @@ function CineCode() {
   const s = samples[active];
 
   return (
-    <div style={{
-      padding: '140px 0 140px',
+    <div id="code" style={{
+      padding: isMobile ? '80px 0 80px' : '140px 0 140px',
       background: 'linear-gradient(180deg, #0a0a0c 0%, #050507 100%)',
       borderTop: `1px solid ${cine.line}`,
     }}>
@@ -124,37 +126,49 @@ function CineCode() {
         meta={<>04 SYSTEMS<br/>PRODUCTION C#<br/>UNITY</>}
       />
 
-      {/* tabs */}
+      {/* tabs — horizontally scrollable on mobile */}
       <div style={{
-        padding: '0 56px', marginBottom: 48,
-        display: 'flex', gap: 0, borderBottom: `1px solid ${cine.line}`,
-        flexWrap: 'wrap',
+        padding: `0 ${px}`, marginBottom: 48,
+        overflowX: isMobile ? 'auto' : 'visible',
+        WebkitOverflowScrolling: 'touch',
       }}>
-        {samples.map((x, i) => (
-          <div key={x.id} onClick={() => setActive(i)} style={{
-            padding: '16px 24px',
-            fontFamily: cine.mono, fontSize: 11, letterSpacing: 1.5,
-            textTransform: 'uppercase',
-            color: i === active ? cine.ink : cine.dim,
-            cursor: 'pointer',
-            borderBottom: i === active ? `2px solid ${cine.accent}` : '2px solid transparent',
-            marginBottom: -1, transition: 'all 0.15s',
-          }}>
-            <span style={{ color: cine.accent, marginRight: 10 }}>0{i + 1}</span>
-            {x.tab}
-          </div>
-        ))}
+        <div style={{
+          display: 'flex', gap: 0,
+          borderBottom: `1px solid ${cine.line}`,
+          minWidth: isMobile ? 'max-content' : 'auto',
+        }}>
+          {samples.map((x, i) => (
+            <div key={x.id} onClick={() => setActive(i)} style={{
+              padding: isMobile ? '14px 16px' : '16px 24px',
+              fontFamily: cine.mono,
+              fontSize: isMobile ? 10 : 11,
+              letterSpacing: 1.5,
+              textTransform: 'uppercase',
+              color: i === active ? cine.ink : cine.dim,
+              cursor: 'pointer',
+              borderBottom: i === active ? `2px solid ${cine.accent}` : '2px solid transparent',
+              marginBottom: -1, transition: 'all 0.15s',
+              whiteSpace: 'nowrap',
+            }}>
+              <span style={{ color: cine.accent, marginRight: 8 }}>0{i + 1}</span>
+              {x.tab}
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* content */}
+      {/* content — stacks on mobile */}
       <div style={{
-        padding: '0 56px', display: 'grid',
-        gridTemplateColumns: '1fr 1fr', gap: 56, alignItems: 'start',
+        padding: `0 ${px}`, display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+        gap: isMobile ? 40 : 56, alignItems: 'start',
       }}>
         <div>
           <h3 style={{
-            fontFamily: cine.display, fontWeight: 500, fontSize: 56,
-            letterSpacing: -1.5, margin: '0 0 44px', lineHeight: 0.98,
+            fontFamily: cine.display, fontWeight: 500,
+            fontSize: isMobile ? 36 : 56,
+            letterSpacing: isMobile ? -0.5 : -1.5,
+            margin: '0 0 44px', lineHeight: 0.98,
             color: cine.ink,
           }}>{s.title}</h3>
 
@@ -167,7 +181,8 @@ function CineCode() {
                 textTransform: 'uppercase', marginBottom: 16,
               }}>{k}</div>
               <p style={{
-                margin: 0, fontFamily: cine.body, fontSize: 16.5,
+                margin: 0, fontFamily: cine.body,
+                fontSize: isMobile ? 14 : 16.5,
                 lineHeight: 1.65, color: cine.ink2,
               }}>{v}</p>
             </div>
@@ -210,8 +225,11 @@ function CineCode() {
           </div>
           <pre style={{
             margin: 0, padding: '24px 28px',
-            fontFamily: cine.mono, fontSize: 13.2, lineHeight: 1.75,
+            fontFamily: cine.mono,
+            fontSize: isMobile ? 11 : 13.2,
+            lineHeight: 1.75,
             color: cine.ink, whiteSpace: 'pre-wrap',
+            overflowX: 'auto',
           }}>
             {s.code.map(([kind, line], i) => (
               <div key={i} style={{

@@ -1,5 +1,8 @@
 // About + Experience timeline
 function CineAbout() {
+  const isMobile = useIsMobile();
+  const px = isMobile ? '24px' : '56px';
+
   const exp = [
     { date: 'Oct 2024, Present', company: 'Dataverso', role: 'Programmer',
       bullets: [
@@ -25,7 +28,7 @@ function CineAbout() {
   ];
 
   return (
-    <div style={{ padding: '140px 0 120px' }}>
+    <div id="experience" style={{ padding: isMobile ? '80px 0 60px' : '140px 0 120px' }}>
       <CineSectionHead
         chapter="01 · Profile"
         title={<>Who I am,<br/><span style={{color: cine.accent}}>what I ship.</span></>}
@@ -34,8 +37,10 @@ function CineAbout() {
 
       {/* About copy */}
       <div style={{
-        padding: '0 56px', marginBottom: 120,
-        display: 'grid', gridTemplateColumns: '280px 1fr', gap: 80,
+        padding: `0 ${px}`, marginBottom: isMobile ? 60 : 120,
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr' : '280px 1fr',
+        gap: isMobile ? 24 : 80,
       }}>
         <div>
           <div style={{
@@ -47,7 +52,9 @@ function CineAbout() {
           }}/>
         </div>
         <div style={{
-          fontFamily: cine.display, fontSize: 30, lineHeight: 1.35,
+          fontFamily: cine.display,
+          fontSize: isMobile ? 22 : 30,
+          lineHeight: 1.35,
           color: cine.ink, letterSpacing: -0.5, maxWidth: 880, fontWeight: 400,
         }}>
           Gameplay programmer with 4+ years shipping Unity & C#, across multiplayer
@@ -58,7 +65,7 @@ function CineAbout() {
       </div>
 
       {/* Experience timeline */}
-      <div style={{ padding: '0 56px' }}>
+      <div style={{ padding: `0 ${px}` }}>
         <div style={{
           fontFamily: cine.mono, fontSize: 11, letterSpacing: 3,
           color: cine.accent, textTransform: 'uppercase', marginBottom: 32,
@@ -66,8 +73,11 @@ function CineAbout() {
 
         {exp.map((e, i) => (
           <div key={e.company} style={{
-            display: 'grid', gridTemplateColumns: '220px 1fr', gap: 56,
-            padding: '44px 0', borderTop: `1px solid ${cine.line}`,
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : '220px 1fr',
+            gap: isMobile ? 16 : 56,
+            padding: isMobile ? '32px 0' : '44px 0',
+            borderTop: `1px solid ${cine.line}`,
             borderBottom: i === exp.length - 1 ? `1px solid ${cine.line}` : 'none',
           }}>
             <div>
@@ -76,7 +86,7 @@ function CineAbout() {
                 color: cine.dim, textTransform: 'uppercase', marginBottom: 12,
               }}>{e.date}</div>
               <div style={{
-                fontFamily: cine.display, fontSize: 28, fontWeight: 500,
+                fontFamily: cine.display, fontSize: isMobile ? 22 : 28, fontWeight: 500,
                 color: cine.ink, letterSpacing: -0.5, lineHeight: 1.1,
                 marginBottom: 6,
               }}>{e.company}</div>
@@ -94,7 +104,7 @@ function CineAbout() {
             </div>
             <ul style={{
               margin: 0, padding: 0, listStyle: 'none',
-              fontFamily: cine.body, fontSize: 15.5, lineHeight: 1.65,
+              fontFamily: cine.body, fontSize: isMobile ? 14 : 15.5, lineHeight: 1.65,
               color: cine.ink2,
             }}>
               {e.bullets.map((b, k) => (

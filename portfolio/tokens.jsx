@@ -17,3 +17,14 @@ const cine = {
   mono: '"JetBrains Mono", monospace',
 };
 window.cine = cine;
+
+function useIsMobile() {
+  const [w, setW] = React.useState(window.innerWidth);
+  React.useEffect(() => {
+    const h = () => setW(window.innerWidth);
+    window.addEventListener('resize', h);
+    return () => window.removeEventListener('resize', h);
+  }, []);
+  return w < 768;
+}
+window.useIsMobile = useIsMobile;

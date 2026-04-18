@@ -1,5 +1,8 @@
 // Projects: cinematic stacked with strong imagery
 function CineProjects() {
+  const isMobile = useIsMobile();
+  const px = isMobile ? '24px' : '56px';
+
   const projects = [
     { n: '01', img: 'assets/Porton.png', title: 'Portonazo', kind: 'Co-op Beat-em-up',
       tech: ['Unity', 'C#', 'Local multiplayer', 'Combat systems'],
@@ -24,7 +27,10 @@ function CineProjects() {
   ];
 
   return (
-    <div style={{ padding: '140px 0 100px', background: cine.bg, borderTop: `1px solid ${cine.line}` }}>
+    <div id="work" style={{
+      padding: isMobile ? '80px 0 60px' : '140px 0 100px',
+      background: cine.bg, borderTop: `1px solid ${cine.line}`,
+    }}>
       <CineSectionHead
         chapter="02 · Selected work"
         title={<>Shipped<br/><span style={{color: cine.accent}}>& played.</span></>}
@@ -34,14 +40,15 @@ function CineProjects() {
       {projects.map((p, i) => (
         <div key={p.n} style={{
           display: 'grid',
-          gridTemplateColumns: i % 2 === 0 ? '1fr 520px' : '520px 1fr',
-          gap: 64,
-          padding: '64px 56px',
+          gridTemplateColumns: isMobile ? '1fr' : (i % 2 === 0 ? '1fr 520px' : '520px 1fr'),
+          gap: isMobile ? 28 : 64,
+          padding: isMobile ? `32px ${px}` : `64px ${px}`,
           borderTop: `1px solid ${cine.line}`,
           alignItems: 'center',
         }}>
+          {/* image — always on top for mobile */}
           <div style={{
-            order: i % 2 === 0 ? 0 : 1,
+            order: isMobile ? -1 : (i % 2 === 0 ? 0 : 1),
             aspectRatio: '16/10',
             backgroundImage: `linear-gradient(180deg, rgba(10,10,12,0) 50%, rgba(10,10,12,0.45) 100%), url(${p.img})`,
             backgroundSize: 'cover', backgroundPosition: 'center',
@@ -52,7 +59,7 @@ function CineProjects() {
               position: 'absolute', top: 16, left: 16,
               fontFamily: cine.mono, fontSize: 10, letterSpacing: 2,
               color: cine.ink, background: 'rgba(10,10,12,0.72)',
-              padding: '6px 10px', letterSpacing: 2,
+              padding: '6px 10px',
             }}>№ {p.n} / 04</div>
           </div>
           <div>
@@ -61,8 +68,10 @@ function CineProjects() {
               color: cine.accent, marginBottom: 20, textTransform: 'uppercase',
             }}>{p.kind}</div>
             <h3 style={{
-              fontFamily: cine.display, fontWeight: 500, fontSize: 60,
-              letterSpacing: -1.5, margin: '0 0 20px', lineHeight: 0.98,
+              fontFamily: cine.display, fontWeight: 500,
+              fontSize: isMobile ? 36 : 60,
+              letterSpacing: isMobile ? -0.5 : -1.5,
+              margin: '0 0 20px', lineHeight: 0.98,
               color: cine.ink,
             }}>{p.title}</h3>
             <div style={{
@@ -70,7 +79,7 @@ function CineProjects() {
               marginBottom: 20, letterSpacing: 0.5,
             }}>Role / {p.role}</div>
             <div style={{
-              fontFamily: cine.body, fontSize: 16, lineHeight: 1.6,
+              fontFamily: cine.body, fontSize: isMobile ? 14 : 16, lineHeight: 1.6,
               color: cine.ink2, marginBottom: 32, maxWidth: 460,
             }}>{p.desc}</div>
             <div style={{

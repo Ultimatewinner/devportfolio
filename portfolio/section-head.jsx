@@ -1,9 +1,11 @@
 // Section header helper
 function CineSectionHead({ chapter, title, meta }) {
+  const isMobile = useIsMobile();
   return (
     <div style={{
       display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
-      padding: '0 56px', marginBottom: 72,
+      padding: isMobile ? '0 24px' : '0 56px',
+      marginBottom: isMobile ? 40 : 72,
     }}>
       <div>
         <div style={{
@@ -11,12 +13,14 @@ function CineSectionHead({ chapter, title, meta }) {
           color: cine.accent, textTransform: 'uppercase', marginBottom: 18,
         }}>{chapter}</div>
         <h2 style={{
-          fontFamily: cine.display, fontWeight: 500, fontSize: 84,
-          letterSpacing: -2.5, margin: 0, lineHeight: 0.95,
+          fontFamily: cine.display, fontWeight: 500,
+          fontSize: isMobile ? 44 : 84,
+          letterSpacing: isMobile ? -1 : -2.5,
+          margin: 0, lineHeight: 0.95,
           color: cine.ink,
         }}>{title}</h2>
       </div>
-      {meta && (
+      {meta && !isMobile && (
         <div style={{
           fontFamily: cine.mono, fontSize: 11, letterSpacing: 2,
           color: cine.dim, textTransform: 'uppercase', textAlign: 'right',
